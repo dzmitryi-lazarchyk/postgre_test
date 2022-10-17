@@ -11,6 +11,7 @@ from tgbot.handlers.admin import register_admin
 from tgbot.handlers.echo import register_echo
 from tgbot.handlers.user import register_user
 from tgbot.middlewares.environment import EnvironmentMiddleware
+from tgbot.models.postgresql import Database
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,7 @@ async def main():
     storage = RedisStorage2() if config.tg_bot.use_redis else MemoryStorage()
     bot = Bot(token=config.tg_bot.token, parse_mode='HTML')
     dp = Dispatcher(bot, storage=storage)
+    db = Database()
 
     bot['config'] = config
 
@@ -50,6 +52,8 @@ async def main():
 
     # start
     try:
+        await db.create()
+        await db.create_table_users()
         await dp.start_polling()
     finally:
         await dp.storage.close()
