@@ -49,7 +49,7 @@ class Database:
         id SERIAL PRIMARY KEY,
         full_name VARCHAR(255) NOT NULL,
         username varchar(255) NULL,
-        telegram_id BIGINT NOT NULL
+        telegram_id BIGINT NOT NULL UNIQUE
         );
         """
         await self.execute(sql, execute=True)
@@ -63,6 +63,17 @@ class Database:
                                                        start=1)
         ])
         return sql, tuple(parameters.values())
+
+    async def insert_user(self, **kwargs):
+        print(kwargs)
+        values = ", ".join([f'${num}' for num, value in enumerate(kwargs.values(),
+                                                         start=1)])
+        sql = f"INSERT INTO Users ({', '.join(kwargs.keys())}) Values({values}) returning *"
+        print(sql)
+        parameters = tuple(kwargs.values())
+        print(parameters)
+        return await self.execute(sql, *parameters, fetchrow=True)
+
     async def select_all_users(self):
         sql = "SELECT * FROM Users"
         return await self.execute(sql, fetch=True)

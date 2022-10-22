@@ -16,8 +16,8 @@ from tgbot.models.postgresql import Database
 logger = logging.getLogger(__name__)
 
 
-def register_all_middlewares(dp, config):
-    dp.setup_middleware(EnvironmentMiddleware(config=config))
+def register_all_middlewares(dp, config, db):
+    dp.setup_middleware(EnvironmentMiddleware(dp=dp, config=config, db=db))
 
 
 def register_all_filters(dp):
@@ -41,12 +41,14 @@ async def main():
 
     storage = RedisStorage2() if config.tg_bot.use_redis else MemoryStorage()
     bot = Bot(token=config.tg_bot.token, parse_mode='HTML')
+
+    global dp,db
     dp = Dispatcher(bot, storage=storage)
     db = Database()
 
     bot['config'] = config
 
-    register_all_middlewares(dp, config)
+    register_all_middlewares(dp, config, db)
     register_all_filters(dp)
     register_all_handlers(dp)
 

@@ -10,3 +10,6 @@ class EnvironmentMiddleware(LifetimeControllerMiddleware):
     
     async def pre_process(self, obj, data, *args):
         data.update(**self.kwargs)
+
+    async def post_process(self, obj, data, *args):
+        del data["db"]
